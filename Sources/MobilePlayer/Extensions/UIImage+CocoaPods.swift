@@ -9,16 +9,15 @@
 import UIKit
 
 extension UIImage {
-
-  convenience init?(podResourceNamed name: String) {
-    let bundleUrl =
-      Bundle(for: MobilePlayerViewController.self).url(forResource: "MobilePlayer", withExtension: "bundle") ??
-      Bundle(for: MobilePlayerViewController.self).bundleURL
-    let bundle = Bundle(url: bundleUrl)
-    self.init(named: name, in: bundle, compatibleWith: nil)
-  }
-
-  var template: UIImage {
-    return withRenderingMode(.alwaysTemplate)
-  }
+    
+    convenience init?(podResourceNamed name: String) {
+        let bundleUrl = MobilePlayerViewController.bundleForResources ?? Bundle(for: MobilePlayerViewController.self).url(forResource: "MobilePlayer", withExtension: "bundle") ??
+                Bundle(for: MobilePlayerViewController.self).bundleURL
+        let bundle = Bundle(url: bundleUrl)
+        self.init(named: name, in: bundle, compatibleWith: nil)
+    }
+    
+    var template: UIImage {
+        return withRenderingMode(.alwaysTemplate)
+    }
 }

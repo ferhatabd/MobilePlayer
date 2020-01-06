@@ -9,13 +9,7 @@
 import UIKit
 import AVKit
 
-// TODO: Fix the initializer issue
-// TODO: Exchange the existing notifications with the ones from the AVPlayer
-// TODO: Implement periodic state observer of AVPlayer to update the UI
-//        also modify the existing State struct to match the values from the AVPlaye r
-// TODO: Add AVPlayerLayer as the main player content layer
-// TODO: After adding the AVPlayerLayer map its videoGraivty property to the ones this VC has
-// TODO: Update to Swift 5
+
 
 /// A view controller for playing media content.
 open class MobilePlayerViewController: UIViewController {
@@ -79,6 +73,14 @@ open class MobilePlayerViewController: UIViewController {
     open override var prefersStatusBarHidden: Bool { true }
     
     open override var preferredStatusBarUpdateAnimation: UIStatusBarAnimation { .fade }
+    
+    open override var prefersHomeIndicatorAutoHidden: Bool { true }
+    
+    /// Bundle url to check for the resources
+    ///
+    /// If it's left nil, then the bundle for the __MobilePlayer__ package
+    /// will be used to look for the resources
+    public static var bundleForResources: URL?
     
     // MARK: Private Properties
     private var controlsView: MobilePlayerControlsView!
@@ -162,6 +164,8 @@ open class MobilePlayerViewController: UIViewController {
             forControlEvents: .touchUpInside)
         
         initializeControlsViewTapRecognizers()
+        
+        controlsView.translatesAutoresizingMaskIntoConstraints = false
     }
     
     private func initializeControlsViewTapRecognizers() {
@@ -188,6 +192,15 @@ open class MobilePlayerViewController: UIViewController {
         super.viewDidLoad()
         view.addSubview(controlsView)
         
+        if #available(iOS 11.0, *) {
+            controlsView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor).isActive = true
+        } else {
+            controlsView.topAnchor.constraint(equalTo: topLayoutGuide.bottomAnchor).isActive = true
+        }
+        controlsView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
+        controlsView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
+        controlsView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
+        
         view.backgroundColor = .black
 
         if let prerollViewController = prerollViewController {
@@ -204,7 +217,7 @@ open class MobilePlayerViewController: UIViewController {
     /// The default implementation of this method sets the frame of the controls view.
     open override func viewWillLayoutSubviews() {
         super.viewWillLayoutSubviews()
-        controlsView.frame = view.bounds
+//        controlsView.frame = view.bounds
     }
     
     /// Notifies the view controller that its view is about to be added to a view hierarchy.
