@@ -80,7 +80,10 @@ open class MobilePlayerViewController: UIViewController {
     ///
     /// If it's left nil, then the bundle for the __MobilePlayer__ package
     /// will be used to look for the resources
-    public static var bundleForResources: URL?
+    open class var bundleForResources: URL? { nil }
+    
+    /// Cast button placeholder 
+    open var castButton: UIButton? { getViewForElementWithIdentifier("cast") as? UIButton }
     
     // MARK: Private Properties
     private var controlsView: MobilePlayerControlsView!
@@ -190,17 +193,7 @@ open class MobilePlayerViewController: UIViewController {
     /// If you override this method make sure you call super's implementation.
     open override func viewDidLoad() {
         super.viewDidLoad()
-        view.addSubview(controlsView)
-        
-        if #available(iOS 11.0, *) {
-            controlsView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor).isActive = true
-        } else {
-            controlsView.topAnchor.constraint(equalTo: topLayoutGuide.bottomAnchor).isActive = true
-        }
-        controlsView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
-        controlsView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
-        controlsView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
-        
+
         view.backgroundColor = .black
 
         if let prerollViewController = prerollViewController {
@@ -283,12 +276,28 @@ open class MobilePlayerViewController: UIViewController {
                           pauseOverlayViewController: MobilePlayerOverlayViewController? = nil,
                           postrollViewController: MobilePlayerOverlayViewController? = nil) {
         self.config = config
-        controlsView = MobilePlayerControlsView(config: config)
         self.prerollViewController = prerollViewController
         self.pauseOverlayViewController = pauseOverlayViewController
         self.postrollViewController = postrollViewController
         self.contentUrl = contentURL
+        setControlsView()
         initializeMobilePlayerViewController()
+    }
+    
+    private func setControlsView() {
+        controlsView?.removeFromSuperview()
+        
+        controlsView = MobilePlayerControlsView(config: config)
+        view.addSubview(controlsView)
+        
+        if #available(iOS 11.0, *) {
+            controlsView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor).isActive = true
+        } else {
+            controlsView.topAnchor.constraint(equalTo: topLayoutGuide.bottomAnchor).isActive = true
+        }
+        controlsView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
+        controlsView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
+        controlsView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
     }
     
     /// Initiates playback of current content.
@@ -296,19 +305,19 @@ open class MobilePlayerViewController: UIViewController {
     /// Starting playback causes dismiss to be called on prerollViewController, pauseOverlayViewController
     /// and postrollViewController.
     public func play() {
-        moviePlayer.play()
+        moviePlayer?.play()
     }
     
     /// Pauses playback of current content.
     ///
     /// Pausing playback causes pauseOverlayViewController to be shown.
     public func pause() {
-        moviePlayer.pause()
+        moviePlayer?.pause()
     }
     
     /// Ends playback of current content.
     public func stop() {
-        moviePlayer.pause()
+        moviePlayer?.pause()
     }
     
     // MARK: Video Rendering
@@ -463,6 +472,8 @@ open class MobilePlayerViewController: UIViewController {
             (childViewController as? MobilePlayerOverlayViewController)?.dismiss()
         }
     }
+    
+    open func readyToPlay()  { }
     
     // MARK: Private Methods
     
@@ -665,6 +676,8 @@ extension MobilePlayerViewController: PlayerItemStatusDelegate {
         case .failed:
             NotificationCenter.default.post(name: NSNotification.Name(rawValue: MobilePlayerDidEncounterErrorNotification), object: self, userInfo: [MobilePlayerErrorUserInfoKey:
                 moviePlayer.error as Any])
+        case .readyToPlay:
+            self.readyToPlay()
         default:
             print(status)
         }
