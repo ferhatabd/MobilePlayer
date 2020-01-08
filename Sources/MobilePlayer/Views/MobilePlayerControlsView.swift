@@ -40,8 +40,8 @@ final class MobilePlayerControlsView: UIView {
         if topBar.elements.count == 0 {
             topBar.addElement(usingConfig: ButtonConfig(dictionary: ["type": "button", "identifier": "close"]))
             topBar.addElement(usingConfig: LabelConfig(dictionary: ["type": "label", "identifier": "title"]))
-            topBar.addElement(usingConfig: ButtonConfig(dictionary: ["type": "button", "identifier": "action"]))
             topBar.addElement(usingConfig: ButtonConfig(dictionary: ["type": "button", "identifier": "cast"]))
+            topBar.addElement(usingConfig: ButtonConfig(dictionary: ["type": "button", "identifier": "action"]))
         }
         addSubview(topBar)
         if bottomBar.elements.count == 0 {

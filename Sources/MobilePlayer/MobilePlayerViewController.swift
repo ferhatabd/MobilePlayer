@@ -261,6 +261,9 @@ open class MobilePlayerViewController: UIViewController {
     /// content begins automatically when there is enough buffered data to ensure uninterrupted playback.
     public var shouldAutoplay: Bool = true
     
+    /// Player will start playing from the beginning once it reaches the end
+    public var shouldAutoRepeat: Bool = false
+    
     /// Initializes a player with content given by `contentURL`. If provided, the overlay view controllers used to
     /// initialize the player should be different instances from each other.
     ///
@@ -473,7 +476,13 @@ open class MobilePlayerViewController: UIViewController {
         }
     }
     
-    open func readyToPlay()  { }
+    /// Player is ready to play
+    open func readyToPlay()  {
+        // start if autoPlay is active
+        if shouldAutoplay {
+            moviePlayer?.play()
+        }
+    }
     
     // MARK: Private Methods
     
@@ -666,7 +675,7 @@ extension MobilePlayerViewController: PlayerItemStatusDelegate {
     }
     
     public func playerDidFinish(_ player: AVPlayer) {
-        if shouldAutoplay {
+        if shouldAutoRepeat {
             player.seek(to: .zero)
         }
     }
