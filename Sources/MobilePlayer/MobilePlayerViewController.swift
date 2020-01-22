@@ -85,6 +85,9 @@ open class MobilePlayerViewController: UIViewController {
     /// Cast button placeholder 
     open var castButton: UIButton? { getViewForElementWithIdentifier("cast") as? UIButton }
     
+    /// Airplay button placeholder
+    open var airplayButton: UIButton? { getViewForElementWithIdentifier("airplay") as? UIButton }
+    
     // MARK: Private Properties
     private var controlsView: MobilePlayerControlsView!
     private var previousStatusBarHiddenValue: Bool?

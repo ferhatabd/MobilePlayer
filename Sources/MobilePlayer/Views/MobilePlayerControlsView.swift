@@ -41,6 +41,7 @@ final class MobilePlayerControlsView: UIView {
             topBar.addElement(usingConfig: ButtonConfig(dictionary: ["type": "button", "identifier": "close"]))
             topBar.addElement(usingConfig: LabelConfig(dictionary: ["type": "label", "identifier": "title"]))
             topBar.addElement(usingConfig: ButtonConfig(dictionary: ["type": "button", "identifier": "cast"]))
+            topBar.addElement(usingConfig: ButtonConfig(dictionary: ["type": "button", "identifier": "airplay"]))
             topBar.addElement(usingConfig: ButtonConfig(dictionary: ["type": "button", "identifier": "action"]))
         }
         addSubview(topBar)

@@ -49,6 +49,8 @@ public class ButtonConfig: ElementConfig {
                 image = UIImage(podResourceNamed: "MLShareButton")?.template
             case "cast":
                 image = nil
+            case "airplay":
+                image = nil 
             default:
                 image = nil
             }
