@@ -70,11 +70,17 @@ open class MobilePlayerViewController: UIViewController {
         }
     }
     
+    #if os(iOS)
     open override var prefersStatusBarHidden: Bool { true }
+    #endif
     
+    #if os(iOS)
     open override var preferredStatusBarUpdateAnimation: UIStatusBarAnimation { .fade }
+    #endif
     
+    #if os(iOS)
     open override var prefersHomeIndicatorAutoHidden: Bool { true }
+    #endif
     
     /// Bundle url to check for the resources
     ///
@@ -91,6 +97,7 @@ open class MobilePlayerViewController: UIViewController {
     // MARK: Private Properties
     private var controlsView: MobilePlayerControlsView!
     private var previousStatusBarHiddenValue: Bool?
+    @available(tvOS, unavailable)
     private var previousStatusBarStyle: UIStatusBarStyle!
     private var isFirstPlay = true
     fileprivate var seeking = false
@@ -147,6 +154,7 @@ open class MobilePlayerViewController: UIViewController {
             },
             forControlEvents: .touchUpInside)
         
+        #if os(iOS)
         if let actionButton = getViewForElementWithIdentifier("action") as? Button {
             actionButton.isHidden = true // Initially hidden until 1 or more `activityItems` are set.
             actionButton.addCallback(
@@ -158,6 +166,8 @@ open class MobilePlayerViewController: UIViewController {
                 },
                 forControlEvents: .touchUpInside)
         }
+        #endif
+        
         
         (getViewForElementWithIdentifier("play") as? ToggleButton)?.addCallback(
             callback: { [weak self] in
@@ -196,9 +206,9 @@ open class MobilePlayerViewController: UIViewController {
     /// If you override this method make sure you call super's implementation.
     open override func viewDidLoad() {
         super.viewDidLoad()
-
+        
         view.backgroundColor = .black
-
+        
         if let prerollViewController = prerollViewController {
             shouldAutoplay = false
             showOverlayViewController(prerollViewController)
@@ -213,7 +223,7 @@ open class MobilePlayerViewController: UIViewController {
     /// The default implementation of this method sets the frame of the controls view.
     open override func viewWillLayoutSubviews() {
         super.viewWillLayoutSubviews()
-//        controlsView.frame = view.bounds
+        //        controlsView.frame = view.bounds
     }
     
     /// Notifies the view controller that its view is about to be added to a view hierarchy.
@@ -227,7 +237,9 @@ open class MobilePlayerViewController: UIViewController {
     open override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         // Force hide status bar.
+        #if os(iOS)
         setNeedsStatusBarAppearanceUpdate()
+        #endif
     }
     
     /// Notifies the view controller that its view is about to be removed from a view hierarchy.
@@ -359,12 +371,14 @@ open class MobilePlayerViewController: UIViewController {
     }
     
     /// An array of activity types that will be excluded when presenting a `UIActivityViewController`
+    #if os(iOS)
     public var excludedActivityTypes: [UIActivity.ActivityType]? = [
         .assignToContact,
         .saveToCameraRoll,
         .postToVimeo,
         .airDrop
     ]
+    #endif
     
     /// Method that is called when a control interface button with identifier "action" is tapped. Presents a
     /// `UIActivityViewController` with `activityItems` set as its activity items. If content is playing, it is paused
@@ -374,6 +388,7 @@ open class MobilePlayerViewController: UIViewController {
     /// parameters:
     ///   - sourceView: On iPads the activity view controller is presented as a popover and a source view needs to
     ///     provided or a crash will occur.
+    #if os(iOS)
     open func showContentActions(sourceView: UIView? = nil) {
         guard let activityItems = activityItems, !activityItems.isEmpty else { return }
         let wasPlaying = (state == .playing)
@@ -393,6 +408,7 @@ open class MobilePlayerViewController: UIViewController {
         }
         present(activityVC, animated: true, completion: nil)
     }
+    #endif
     
     // MARK: Controls
     

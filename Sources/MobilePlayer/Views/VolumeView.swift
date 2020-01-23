@@ -12,6 +12,7 @@ import MediaPlayer
 private let defaultIncreaseVolumeTintColor = UIColor.black
 private let defaultReduceVolumeTintColor = UIColor.black
 
+@available(tvOS, unavailable)
 class VolumeView: UIView {
   let volumeSlider = MPVolumeView(frame: CGRect(x: -22, y: 50, width: 110, height: 50))
   let increaseVolumeImage = UIImageView(frame: CGRect(x: 10, y: 0, width: 20, height: 20))

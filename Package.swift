@@ -5,7 +5,7 @@ import PackageDescription
 
 let package = Package(
     name: "MobilePlayer",
-    platforms: [.iOS(.v10), .tvOS(.v10) ],
+    platforms: [.iOS(.v10), .tvOS(.v11)],
     products: [
         // Products define the executables and libraries produced by a package, and make them visible to other packages.
         .library(
