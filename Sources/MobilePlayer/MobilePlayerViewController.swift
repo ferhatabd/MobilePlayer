@@ -322,19 +322,19 @@ open class MobilePlayerViewController: UIViewController {
     ///
     /// Starting playback causes dismiss to be called on prerollViewController, pauseOverlayViewController
     /// and postrollViewController.
-    public func play() {
+    open func play() {
         moviePlayer?.play()
     }
     
     /// Pauses playback of current content.
     ///
     /// Pausing playback causes pauseOverlayViewController to be shown.
-    public func pause() {
+    open func pause() {
         moviePlayer?.pause()
     }
     
     /// Ends playback of current content.
-    public func stop() {
+    open func stop() {
         moviePlayer?.pause()
     }
     
@@ -499,7 +499,7 @@ open class MobilePlayerViewController: UIViewController {
     open func readyToPlay()  {
         // start if autoPlay is active
         if shouldAutoplay {
-            moviePlayer?.play()
+            self.play()
         }
     }
     
