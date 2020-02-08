@@ -25,7 +25,7 @@ struct StateHelper {
             
         @unknown default:
             #if DEBUG
-            fatalError("StateHelper: Handle all cases from AVPlayer.TimeControlStatus")
+            preconditionFailure("StateHelper: Handle all cases from AVPlayer.TimeControlStatus")
             #else
             print("IMPORTANT: Handle all cases from AVPlayer.TimeControlStatus")
             return .idle
