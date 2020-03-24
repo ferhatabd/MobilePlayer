@@ -125,6 +125,7 @@ open class MobilePlayerViewController: UIViewController {
     }
     
     private func initializePlayerView() {
+        playerView?.removeFromSuperview()
         playerView = PlayerView()
         playerView.translatesAutoresizingMaskIntoConstraints = false
         playerView.delegate = self
