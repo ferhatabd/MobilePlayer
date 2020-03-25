@@ -10,6 +10,8 @@ import UIKit
 import MediaPlayer
 
 final class MobilePlayerControlsView: UIView {
+    /// External controls view 
+    private var externalView: MobilePlayerControllable?
     let config: MobilePlayerConfig
     let previewImageView = UIImageView(frame: .zero)
     let activityIndicatorView = UIActivityIndicatorView(style: .white)
@@ -60,25 +62,37 @@ final class MobilePlayerControlsView: UIView {
     
     override func layoutSubviews() {
         let size = bounds.size
+        
+        if let _view = externalView {
+            if _view.superview == nil {
+                _view.frame = bounds
+                addSubview(_view)
+                topBar.removeFromSuperview()
+                bottomBar.removeFromSuperview()
+            }
+        } else {
+            topBar.sizeToFit()
+            topBar.frame = CGRect(
+                x: 0,
+                y: controlsHidden ? -topBar.frame.size.height : 0,
+                width: size.width,
+                height: topBar.frame.size.height)
+            topBar.alpha = controlsHidden ? 0 : 1
+            bottomBar.sizeToFit()
+            bottomBar.frame = CGRect(
+                x: 0,
+                y: size.height - (controlsHidden ? 0 : bottomBar.frame.size.height),
+                width: size.width,
+                height: bottomBar.frame.size.height)
+            bottomBar.alpha = controlsHidden ? 0 : 1
+
+        }
+        
         previewImageView.frame = bounds
         activityIndicatorView.sizeToFit()
         activityIndicatorView.frame.origin = CGPoint(
             x: (size.width - activityIndicatorView.frame.size.width) / 2,
             y: (size.height - activityIndicatorView.frame.size.height) / 2)
-        topBar.sizeToFit()
-        topBar.frame = CGRect(
-            x: 0,
-            y: controlsHidden ? -topBar.frame.size.height : 0,
-            width: size.width,
-            height: topBar.frame.size.height)
-        topBar.alpha = controlsHidden ? 0 : 1
-        bottomBar.sizeToFit()
-        bottomBar.frame = CGRect(
-            x: 0,
-            y: size.height - (controlsHidden ? 0 : bottomBar.frame.size.height),
-            width: size.width,
-            height: bottomBar.frame.size.height)
-        bottomBar.alpha = controlsHidden ? 0 : 1
         overlayContainerView.frame = CGRect(
             x: 0,
             y: controlsHidden ? 0 : topBar.frame.size.height,
@@ -88,5 +102,10 @@ final class MobilePlayerControlsView: UIView {
             overlay.frame = overlayContainerView.bounds
         }
         super.layoutSubviews()
+    }
+    
+    internal func setExternalView(_ view: MobilePlayerControllable) {
+        self.externalView = view
+        layoutSubviews()
     }
 }

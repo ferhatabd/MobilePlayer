@@ -16,7 +16,7 @@ protocol SliderDelegate: class {
 }
 
 // MARK: - Class
-class Slider: UIView {
+public class Slider: UIView {
     let config: SliderConfig
     weak var delegate: SliderDelegate?
     var minimumValue: Float = 0    { didSet { setNeedsLayout() } }
@@ -112,7 +112,7 @@ class Slider: UIView {
     
     // MARK: Layout
     
-    override func sizeThatFits(_ size: CGSize) -> CGSize {
+    override public func sizeThatFits(_ size: CGSize) -> CGSize {
         let width = (config.widthCalculation == .AsDefined) ? config.width : size.width
         
         let minHeight = max(config.thumbHeight, config.trackHeight)
@@ -121,7 +121,7 @@ class Slider: UIView {
         return CGSize(width: width, height: height)
     }
     
-    override func layoutSubviews() {
+    override public func layoutSubviews() {
         let realMaximumValue   = max(0.00001, CGFloat(maximumValue - minimumValue))
         let realAvailableValue = max(0, min(realMaximumValue, CGFloat(availableValue - minimumValue)))
         let realValue          = max(0, min(realMaximumValue, CGFloat(value - minimumValue)))

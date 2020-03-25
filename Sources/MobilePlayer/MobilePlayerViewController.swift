@@ -58,6 +58,7 @@ open class MobilePlayerViewController: UIViewController {
     /// Player
     public var moviePlayer: AVPlayer! { playerView?.player }
     
+    
     // MARK: Mapped Properties
     
     /// A localized string that represents the video this controller manages. Setting a value will update the title label
@@ -100,13 +101,17 @@ open class MobilePlayerViewController: UIViewController {
     @available(tvOS, unavailable)
     private var previousStatusBarStyle: UIStatusBarStyle!
     private var isFirstPlay = true
-    fileprivate var seeking = false
+    fileprivate var seeking = false {
+        didSet {
+            externalControlsView?.setSeeking(seeking)
+        }
+    }
     fileprivate var wasPlayingBeforeSeek = false
     private var hideControlsTimer: Timer?
     private var contentUrl: URL!
     private var playerView: PlayerView!
     private var playerObserver: Any!
-    
+    private var externalControlsView: MobilePlayerControllable!
     
     // MARK: Initialization
     
@@ -138,20 +143,29 @@ open class MobilePlayerViewController: UIViewController {
         
     }
     
+    private func dismissCallback() {
+        if let navigationController = navigationController {
+            navigationController.popViewController(animated: true)
+        } else if let presentingController = presentingViewController {
+            presentingController.dismiss(animated: true)
+        }
+    }
+    
+    private func actionButtonCallback(sourceView: UIView) {
+        showContentActions(sourceView: sourceView)
+    }
+    
+    private func toggleButtonCallback() {
+        resetHideControlsTimer()
+        state == .playing ? pause() : play()
+    }
     
     private func initializeControlsView() {
         (getViewForElementWithIdentifier("playback") as? Slider)?.delegate = self
         
         (getViewForElementWithIdentifier("close") as? Button)?.addCallback(
             callback: { [weak self] in
-                guard let slf = self else {
-                    return
-                }
-                if let navigationController = slf.navigationController {
-                    navigationController.popViewController(animated: true)
-                } else if let presentingController = slf.presentingViewController {
-                    presentingController.dismiss(animated: true)
-                }
+                self?.dismissCallback()
             },
             forControlEvents: .touchUpInside)
         
@@ -163,7 +177,7 @@ open class MobilePlayerViewController: UIViewController {
                     guard let slf = self else {
                         return
                     }
-                    slf.showContentActions(sourceView: actionButton)
+                    slf.actionButtonCallback(sourceView: actionButton)
                 },
                 forControlEvents: .touchUpInside)
         }
@@ -172,11 +186,7 @@ open class MobilePlayerViewController: UIViewController {
         
         (getViewForElementWithIdentifier("play") as? ToggleButton)?.addCallback(
             callback: { [weak self] in
-                guard let slf = self else {
-                    return
-                }
-                slf.resetHideControlsTimer()
-                slf.state == .playing ? slf.pause() : slf.play()
+                self?.toggleButtonCallback()
             },
             forControlEvents: .touchUpInside)
         
@@ -293,12 +303,15 @@ open class MobilePlayerViewController: UIViewController {
                           config: MobilePlayerConfig = MobilePlayerViewController.globalConfig,
                           prerollViewController: MobilePlayerOverlayViewController? = nil,
                           pauseOverlayViewController: MobilePlayerOverlayViewController? = nil,
-                          postrollViewController: MobilePlayerOverlayViewController? = nil) {
+                          postrollViewController: MobilePlayerOverlayViewController? = nil,
+                          externalControlsView view: MobilePlayerControllable? = nil) {
         self.config = config
         self.prerollViewController = prerollViewController
         self.pauseOverlayViewController = pauseOverlayViewController
         self.postrollViewController = postrollViewController
         self.contentUrl = contentURL
+        self.externalControlsView = view
+        self.controlsView.setExternalView(view)
         setControlsView()
         initializeMobilePlayerViewController()
     }
@@ -340,6 +353,7 @@ open class MobilePlayerViewController: UIViewController {
     open func stop() {
         moviePlayer?.pause()
     }
+    
     
     // MARK: Video Rendering
     
@@ -442,6 +456,7 @@ open class MobilePlayerViewController: UIViewController {
     /// this behavior.
     public func handleContentTap() {
         controlsHidden = !controlsHidden
+        externalControlsView?.setControls(hidden: controlsHidden, animated: true, nil)
     }
     
     // MARK: Overlays
@@ -545,27 +560,40 @@ open class MobilePlayerViewController: UIViewController {
         guard let item = moviePlayer?.currentItem else { return }
         let isTimeValid = item.duration.isNumeric && item.duration.isValid
         
+        let maxValue = Float(isTimeValid ? item.duration.seconds : 0)
+        let availableValue = Float(isTimeValid ? item.duration.seconds: 0)
+        //
+        let currentTimeText = textForPlaybackTime(time: item.currentTime().seconds)
+        let remaningTimeText = "-\(textForPlaybackTime(time: item.duration.seconds - item.currentTime().seconds))"
+        let durationText = textForPlaybackTime(time: item.duration.seconds)
+        
+        // update the external view if there is any
+        externalControlsView?.updateSlider(maxValue: maxValue, currentValue: availableValue)
+        externalControlsView?.currentTime(text: currentTimeText)
+        externalControlsView?.remainingTime(text: remaningTimeText)
+        externalControlsView?.duration(text: durationText)
+        
         if let playbackSlider = getViewForElementWithIdentifier("playback") as? Slider {
-            playbackSlider.maximumValue = Float(isTimeValid ? item.duration.seconds : 0)
+            playbackSlider.maximumValue = maxValue
             if !seeking {
                 let sliderValue = Float(isTimeValid ? item.currentTime().seconds : 0)
                 playbackSlider.setValue(value: sliderValue, animatedForDuration: MobilePlayerViewController.playbackInterfaceUpdateInterval)
             }
-            let availableValue = Float(isTimeValid ? item.duration.seconds: 0)
+            
             playbackSlider.setAvailableValue(
                 availableValue: availableValue,
                 animatedForDuration: MobilePlayerViewController.playbackInterfaceUpdateInterval)
         }
         if let currentTimeLabel = getViewForElementWithIdentifier("currentTime") as? Label {
-            currentTimeLabel.text = textForPlaybackTime(time: item.currentTime().seconds)
+            currentTimeLabel.text = currentTimeText
             currentTimeLabel.superview?.setNeedsLayout()
         }
         if let remainingTimeLabel = getViewForElementWithIdentifier("remainingTime") as? Label {
-            remainingTimeLabel.text = "-\(textForPlaybackTime(time: item.duration.seconds - item.currentTime().seconds))"
+            remainingTimeLabel.text = remaningTimeText
             remainingTimeLabel.superview?.setNeedsLayout()
         }
         if let durationLabel = getViewForElementWithIdentifier("duration") as? Label {
-            durationLabel.text = textForPlaybackTime(time: item.duration.seconds)
+            durationLabel.text = durationText
             durationLabel.superview?.setNeedsLayout()
         }
         updateShownTimedOverlays()
@@ -599,7 +627,7 @@ open class MobilePlayerViewController: UIViewController {
     // TODO: Change accordingly later on
     private func handleMoviePlayerPlaybackStateDidChangeNotification() {
         state = StateHelper.calculateStateUsing(previousState: previousState, andPlaybackState: moviePlayer.timeControlStatus)
-        
+        externalControlsView?.playerStateDidChange(state)
         let playButton = getViewForElementWithIdentifier("play") as? ToggleButton
         if state == .playing {
             doFirstPlaySetupIfNeeded()
