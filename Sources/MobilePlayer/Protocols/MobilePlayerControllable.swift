@@ -22,7 +22,7 @@ public protocol MobilePlayerControllable where Self: UIView {
     var toggleCallback: PlayerToggleCallback? { get set }
     var actionButtonCallback: ActionButtonCallback? { get set }
     var dismissButtonCallback: DismissButtonCallback? { get set }
-    var slider: Slider { get set }
+    var slider: Slider! { get set }
 
     /// Method to hide the controls view
     /// - Parameters:
@@ -35,7 +35,7 @@ public protocol MobilePlayerControllable where Self: UIView {
     /// - Parameter state: New state
     func playerStateDidChange(_ state: MobilePlayerViewController.State)
     
-    func updateSlider(maxValue: Float, currentValue: Float)
+    func updateSlider(maxValue: Float, availableValue: Float, currentValue: Float)
     
     /// Updates the current time text
     /// - Parameter text: Current time string

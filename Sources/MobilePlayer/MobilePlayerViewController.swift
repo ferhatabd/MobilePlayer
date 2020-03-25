@@ -45,7 +45,7 @@ open class MobilePlayerViewController: UIViewController {
     // MARK: Player Configuration
     
     // TODO: Move inside MobilePlayerConfig
-    private static let playbackInterfaceUpdateInterval = 0.25
+    public static let playbackInterfaceUpdateInterval = 0.25
     
     /// The global player configuration object that is loaded by a player if none is passed for its
     /// initialization.
@@ -310,9 +310,11 @@ open class MobilePlayerViewController: UIViewController {
         self.pauseOverlayViewController = pauseOverlayViewController
         self.postrollViewController = postrollViewController
         self.contentUrl = contentURL
-        self.externalControlsView = view
-        self.controlsView.setExternalView(view)
         setControlsView()
+        self.externalControlsView = view
+        if externalControlsView != nil {
+            self.controlsView.setExternalView(externalControlsView)
+        }
         initializeMobilePlayerViewController()
     }
     
@@ -324,13 +326,11 @@ open class MobilePlayerViewController: UIViewController {
         
         if #available(iOS 11.0, *) {
             controlsView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor).isActive = true
-            controlsView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor).isActive = true
-            controlsView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor).isActive = true
         } else {
             controlsView.topAnchor.constraint(equalTo: topLayoutGuide.bottomAnchor).isActive = true
-            controlsView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
-            controlsView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
         }
+        controlsView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
+        controlsView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
         controlsView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
     }
     
@@ -566,17 +566,20 @@ open class MobilePlayerViewController: UIViewController {
         let currentTimeText = textForPlaybackTime(time: item.currentTime().seconds)
         let remaningTimeText = "-\(textForPlaybackTime(time: item.duration.seconds - item.currentTime().seconds))"
         let durationText = textForPlaybackTime(time: item.duration.seconds)
+        let sliderValue = Float(isTimeValid ? item.currentTime().seconds : 0)
         
         // update the external view if there is any
-        externalControlsView?.updateSlider(maxValue: maxValue, currentValue: availableValue)
+        externalControlsView?.updateSlider(maxValue: maxValue, availableValue: availableValue, currentValue: sliderValue)
         externalControlsView?.currentTime(text: currentTimeText)
         externalControlsView?.remainingTime(text: remaningTimeText)
         externalControlsView?.duration(text: durationText)
+        if !seeking {
+            
+        }
         
         if let playbackSlider = getViewForElementWithIdentifier("playback") as? Slider {
             playbackSlider.maximumValue = maxValue
             if !seeking {
-                let sliderValue = Float(isTimeValid ? item.currentTime().seconds : 0)
                 playbackSlider.setValue(value: sliderValue, animatedForDuration: MobilePlayerViewController.playbackInterfaceUpdateInterval)
             }
             
@@ -691,15 +694,15 @@ extension MobilePlayerViewController: MobilePlayerOverlayViewControllerDelegate 
 // MARK: - TimeSliderDelegate
 extension MobilePlayerViewController: SliderDelegate {
     
-    func sliderThumbPanDidBegin(slider: Slider) {
+    public func sliderThumbPanDidBegin(slider: Slider) {
         seeking = true
         wasPlayingBeforeSeek = (state == .playing)
         pause()
     }
     
-    func sliderThumbDidPan(slider: Slider) {}
+    public func sliderThumbDidPan(slider: Slider) {}
     
-    func sliderThumbPanDidEnd(slider: Slider) {
+    public func sliderThumbPanDidEnd(slider: Slider) {
         seeking = false
         guard let item = moviePlayer?.currentItem, item.duration.isValid, item.duration.isNumeric else { return }
         

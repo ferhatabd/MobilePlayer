@@ -9,7 +9,7 @@
 import UIKit
 
 // MARK: - Delegate
-protocol SliderDelegate: class {
+public protocol SliderDelegate: class {
     func sliderThumbPanDidBegin(slider: Slider)
     func sliderThumbDidPan(slider: Slider)
     func sliderThumbPanDidEnd(slider: Slider)
@@ -17,12 +17,12 @@ protocol SliderDelegate: class {
 
 // MARK: - Class
 public class Slider: UIView {
-    let config: SliderConfig
-    weak var delegate: SliderDelegate?
-    var minimumValue: Float = 0    { didSet { setNeedsLayout() } }
-    var value: Float = 0           { didSet { setNeedsLayout() } }
-    var availableValue: Float = 0  { didSet { setNeedsLayout() } }
-    var maximumValue: Float = 1    { didSet { setNeedsLayout() } }
+    public let config: SliderConfig
+    public weak var delegate: SliderDelegate?
+    public var minimumValue: Float = 0    { didSet { setNeedsLayout() } }
+    public var value: Float = 0           { didSet { setNeedsLayout() } }
+    public var availableValue: Float = 0  { didSet { setNeedsLayout() } }
+    public var maximumValue: Float = 1    { didSet { setNeedsLayout() } }
     
     let maximumTrack = UIView(frame: .zero)
     let availableTrack = UIView(frame: .zero)
@@ -31,7 +31,7 @@ public class Slider: UIView {
     
     // MARK: Initialization
     
-    init(config: SliderConfig = SliderConfig()) {
+    public init(config: SliderConfig = SliderConfig()) {
         self.config = config
         super.init(frame: .zero)
         accessibilityLabel = accessibilityLabel ?? config.identifier
@@ -61,7 +61,7 @@ public class Slider: UIView {
     
     // MARK: Setters
     
-    func setValue(value: Float, animatedForDuration duration: TimeInterval) {
+    public func setValue(value: Float, animatedForDuration duration: TimeInterval) {
         self.value = value
         if duration > 0 {
             UIView.animate(
@@ -75,7 +75,7 @@ public class Slider: UIView {
         }
     }
     
-    func setAvailableValue(availableValue: Float, animatedForDuration duration: TimeInterval) {
+    public func setAvailableValue(availableValue: Float, animatedForDuration duration: TimeInterval) {
         self.availableValue = availableValue
         if duration > 0 {
             UIView.animate(
