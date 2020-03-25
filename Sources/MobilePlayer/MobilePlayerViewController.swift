@@ -311,11 +311,13 @@ open class MobilePlayerViewController: UIViewController {
         
         if #available(iOS 11.0, *) {
             controlsView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor).isActive = true
+            controlsView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor).isActive = true
+            controlsView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor).isActive = true
         } else {
             controlsView.topAnchor.constraint(equalTo: topLayoutGuide.bottomAnchor).isActive = true
+            controlsView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
+            controlsView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
         }
-        controlsView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
-        controlsView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
         controlsView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
     }
     

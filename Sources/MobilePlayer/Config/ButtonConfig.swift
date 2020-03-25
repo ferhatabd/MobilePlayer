@@ -50,7 +50,11 @@ public class ButtonConfig: ElementConfig {
             case "cast":
                 image = nil
             case "airplay":
-                image = nil 
+                image = nil
+            case "skipForward":
+                image = UIImage(podResourceNamed: "pbr_skip_fwd")?.template
+            case "skipBackward":
+                image = UIImage(podResourceNamed: "pbr_skip_bwd")?.template
             default:
                 image = nil
             }
