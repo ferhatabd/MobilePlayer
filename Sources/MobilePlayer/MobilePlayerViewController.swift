@@ -310,12 +310,14 @@ open class MobilePlayerViewController: UIViewController {
         self.pauseOverlayViewController = pauseOverlayViewController
         self.postrollViewController = postrollViewController
         self.contentUrl = contentURL
-        setControlsView()
         self.externalControlsView = view
-        if externalControlsView != nil {
-            self.controlsView.setExternalView(externalControlsView)
-        }
+        setControlsView()
         initializeMobilePlayerViewController()
+    }
+    
+    private func wireExternalView() {
+        guard let externalControls = self.externalControlsView else { return }
+        controlsView?.setExternalView(externalControls)
     }
     
     private func setControlsView() {
@@ -332,6 +334,8 @@ open class MobilePlayerViewController: UIViewController {
         controlsView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
         controlsView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
         controlsView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
+        
+        wireExternalView()
     }
     
     /// Initiates playback of current content.

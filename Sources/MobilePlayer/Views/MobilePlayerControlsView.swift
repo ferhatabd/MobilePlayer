@@ -64,8 +64,8 @@ final class MobilePlayerControlsView: UIView {
         let size = bounds.size
         
         if let _view = externalView {
+            _view.frame = bounds
             if _view.superview == nil {
-                _view.frame = bounds
                 addSubview(_view)
                 topBar.removeFromSuperview()
                 bottomBar.removeFromSuperview()
