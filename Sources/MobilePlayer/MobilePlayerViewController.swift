@@ -146,6 +146,7 @@ open class MobilePlayerViewController: UIViewController {
     }
     
     private func actionButtonCallback(sourceView: UIView) {
+        resetHideControlsTimer()
         showContentActions(sourceView: sourceView)
     }
     
@@ -314,9 +315,11 @@ open class MobilePlayerViewController: UIViewController {
         guard let externalControls = self.externalControlsView else { return }
         controlsView?.setExternalView(externalControls)
         /// set external view callbacks
-        externalControlsView.toggleCallback = self.toggleButtonCallback
-        externalControlsView.actionButtonCallback = self.actionButtonCallback
-        externalControlsView.dismissButtonCallback = self.dismissCallback
+        externalControls.toggleCallback = self.toggleButtonCallback
+        externalControls.actionButtonCallback = self.actionButtonCallback
+        externalControls.dismissButtonCallback = self.dismissCallback
+        externalControls.skipBwdCallback = self.skipBwd
+        externalControls.skipFwdCallback = self.skipFwd
     }
     
     private func setControlsView() {
@@ -355,6 +358,24 @@ open class MobilePlayerViewController: UIViewController {
     /// Ends playback of current content.
     open func stop() {
         moviePlayer?.pause()
+    }
+    
+    /// Scrolls playback to 15 seconds later
+    open func skipFwd() {
+        guard let player = moviePlayer, let item = player.currentItem else { return }
+        let currentTime = player.currentTime().seconds
+        let nextTime = min(currentTime + 15, item.duration.seconds)
+        player.seek(to: CMTime(seconds: nextTime, preferredTimescale: CMTimeScale(NSEC_PER_SEC)))
+        resetHideControlsTimer()
+    }
+    
+    /// Scrolls playback to 15 seconds before
+    open func skipBwd() {
+        guard let player = moviePlayer else { return }
+        let currentTime = player.currentTime().seconds
+        let nextTime = max(currentTime - 15, 0)
+        player.seek(to: CMTime(seconds: nextTime, preferredTimescale: CMTimeScale(NSEC_PER_SEC)))
+        resetHideControlsTimer()
     }
     
     

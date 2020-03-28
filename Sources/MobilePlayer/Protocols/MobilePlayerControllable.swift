@@ -14,6 +14,10 @@ public typealias ActionSourceView = UIView
 public typealias ActionButtonCallback = ((ActionSourceView) -> Void)
 /// Close button callback
 public typealias DismissButtonCallback = (() -> Void)
+/// Skip fwd callback
+public typealias SkipFwdCallback = (() -> Void)
+/// Skip bwd callback
+public typealias SkipBwdCallback = (() -> Void)
 
 /// Lays out the rules for any view becoming eligible to be able to
 /// used as an external media player controller view
@@ -22,6 +26,9 @@ public protocol MobilePlayerControllable where Self: UIView {
     var toggleCallback: PlayerToggleCallback? { get set }
     var actionButtonCallback: ActionButtonCallback? { get set }
     var dismissButtonCallback: DismissButtonCallback? { get set }
+    var skipFwdCallback: SkipFwdCallback? { get set }
+    var skipBwdCallback: SkipBwdCallback? { get set }
+    
     var slider: Slider! { get set }
 
     /// Method to hide the controls view
