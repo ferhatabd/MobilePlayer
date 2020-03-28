@@ -89,12 +89,6 @@ open class MobilePlayerViewController: UIViewController {
     /// will be used to look for the resources
     open class var bundleForResources: URL? { nil }
     
-    /// Cast button placeholder 
-    open var castButton: UIButton? { getViewForElementWithIdentifier("cast") as? UIButton }
-    
-    /// Airplay button placeholder
-    open var airplayButton: UIButton? { getViewForElementWithIdentifier("airplay") as? UIButton }
-    
     // MARK: Private Properties
     private var controlsView: MobilePlayerControlsView!
     private var previousStatusBarHiddenValue: Bool?
@@ -251,6 +245,7 @@ open class MobilePlayerViewController: UIViewController {
         #if os(iOS)
         setNeedsStatusBarAppearanceUpdate()
         #endif
+        resetHideControlsTimer()
     }
     
     /// Notifies the view controller that its view is about to be removed from a view hierarchy.
@@ -318,6 +313,10 @@ open class MobilePlayerViewController: UIViewController {
     private func wireExternalView() {
         guard let externalControls = self.externalControlsView else { return }
         controlsView?.setExternalView(externalControls)
+        /// set external view callbacks
+        externalControlsView.toggleCallback = self.toggleButtonCallback
+        externalControlsView.actionButtonCallback = self.actionButtonCallback
+        externalControlsView.dismissButtonCallback = self.dismissCallback
     }
     
     private func setControlsView() {
@@ -627,8 +626,10 @@ open class MobilePlayerViewController: UIViewController {
             ti: 3,
             callback: {
                 self.controlsView.controlsHidden = (self.state == .playing)
+                self.externalControlsView?.setControls(hidden:  (self.state == .playing), animated: true, nil)
         },
-            repeats: false)
+            repeats: false
+        )
     }
     
     // TODO: Change accordingly later on
@@ -639,7 +640,7 @@ open class MobilePlayerViewController: UIViewController {
         if state == .playing {
             doFirstPlaySetupIfNeeded()
             playButton?.toggled = true
-            if !controlsView.controlsHidden {
+            if !controlsView.controlsHidden, let timer = hideControlsTimer, !timer.isValid {
                 resetHideControlsTimer()
             }
             prerollViewController?.dismiss()
