@@ -56,6 +56,30 @@ public protocol MobilePlayerControllable where Self: UIView {
     /// - Parameter text: Duration string
     func duration(text: String)
     
+    /// Change the seeking status
+    /// - Parameter isSeeking: New Seek status
     func setSeeking(_ isSeeking: Bool)
+    
+    /// Sets the Toggle action callback
+    /// - Parameter callback: callback to be used
+    func setToggleCallback(_ callback: @escaping PlayerToggleCallback) -> Void
+    
+    /// Sets the action callback
+    /// - Parameter callback: callback to be used
+    func setActionCallback(_ callback: @escaping ActionButtonCallback) -> Void
+    
+    /// Sets the Dismiss action callback
+    /// - Parameter callback: callback to be used
+    func setDismissCallback(_ callback: @escaping DismissButtonCallback) -> Void
+    
+    /// Sets the Skip fwd action callback
+    /// - Parameter callback: callback to be used
+    func setSkipFwdCallback(_ callback: @escaping SkipFwdCallback) -> Void
+    
+    /// Sets the Skip bwd action callback
+    /// - Parameter callback: callback to be used
+    func setSkipBwdCallback(_ callback: @escaping SkipBwdCallback) -> Void
+    
+    
 }
 

@@ -314,12 +314,23 @@ open class MobilePlayerViewController: UIViewController {
     private func wireExternalView() {
         guard let externalControls = self.externalControlsView else { return }
         controlsView?.setExternalView(externalControls)
+       
         /// set external view callbacks
-        externalControls.toggleCallback = self.toggleButtonCallback
-        externalControls.actionButtonCallback = self.actionButtonCallback
-        externalControls.dismissButtonCallback = self.dismissCallback
-        externalControls.skipBwdCallback = self.skipBwd
-        externalControls.skipFwdCallback = self.skipFwd
+        externalControls.setToggleCallback { [weak self] in
+            self?.toggleButtonCallback()
+        }
+        externalControls.setActionCallback { [weak self] (sourceView) in
+            self?.actionButtonCallback(sourceView: sourceView)
+        }
+        externalControls.setDismissCallback { [weak self] in
+            self?.dismissCallback()
+        }
+        externalControls.setSkipBwdCallback { [weak self] in
+            self?.skipBwd()
+        }
+        externalControls.setSkipFwdCallback { [weak self] in
+            self?.skipFwd()
+        }
     }
     
     private func setControlsView() {
