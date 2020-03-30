@@ -108,8 +108,8 @@ open class MobilePlayerViewController: UIViewController {
     private var externalControlsView: MobilePlayerControllable!
     
     // MARK: Initialization
-    
-    
+   
+    /// initialize the main player VC
     private func initializeMobilePlayerViewController() {
         view.clipsToBounds = true
         edgesForExtendedLayout = []
@@ -314,7 +314,7 @@ open class MobilePlayerViewController: UIViewController {
     private func wireExternalView() {
         guard let externalControls = self.externalControlsView else { return }
         controlsView?.setExternalView(externalControls)
-       
+        
         /// set external view callbacks
         externalControls.setToggleCallback { [weak self] in
             self?.toggleButtonCallback()
@@ -535,6 +535,10 @@ open class MobilePlayerViewController: UIViewController {
             overlayViewController.didMove(toParent: self)
         }
     }
+    
+    /// Can be used as the last point before the postrol view controller shown in ortder to update it
+    /// - Parameter viewController: PostrollViewController to be shown
+    open func willShowPostrollViewController(_ viewController: MobilePlayerOverlayViewController) { }
     
     /// Dismisses all currently presented overlay view controllers and clears any timed overlays.
     public func clearOverlays() {
@@ -767,6 +771,13 @@ extension MobilePlayerViewController: PlayerItemStatusDelegate {
     public func playerDidFinish(_ player: AVPlayer) {
         if shouldAutoRepeat {
             player.seek(to: .zero)
+        } else {
+            if let postrollVC = postrollViewController {
+                prerollViewController?.dismiss()
+                pauseOverlayViewController?.dismiss()
+                willShowPostrollViewController(postrollVC)
+                showOverlayViewController(postrollVC)
+            }
         }
     }
     
