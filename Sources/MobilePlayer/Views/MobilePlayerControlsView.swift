@@ -70,6 +70,7 @@ final class MobilePlayerControlsView: UIView {
                 topBar.removeFromSuperview()
                 bottomBar.removeFromSuperview()
             }
+            _view.setControls(hidden: controlsHidden, animated: true, nil)
         } else {
             topBar.sizeToFit()
             topBar.frame = CGRect(

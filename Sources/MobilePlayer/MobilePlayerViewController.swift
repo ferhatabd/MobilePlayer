@@ -309,6 +309,7 @@ open class MobilePlayerViewController: UIViewController {
         self.externalControlsView = view
         setControlsView()
         initializeMobilePlayerViewController()
+        controlsHidden = true 
     }
     
     private func wireExternalView() {
@@ -661,8 +662,8 @@ open class MobilePlayerViewController: UIViewController {
         hideControlsTimer = Timer.scheduledTimerWithTimeInterval(
             ti: 3,
             callback: {
-                self.controlsView.controlsHidden = (self.state == .playing)
-                self.externalControlsView?.setControls(hidden:  (self.state == .playing), animated: true, nil)
+                self.controlsView.controlsHidden = (self.state == .playing) || self.isFirstPlay
+                self.externalControlsView?.setControls(hidden:  (self.controlsView.controlsHidden), animated: true, nil)
         },
             repeats: false
         )
