@@ -106,6 +106,7 @@ open class MobilePlayerViewController: UIViewController {
     private var playerView: PlayerView!
     private var playerObserver: Any!
     private var externalControlsView: MobilePlayerControllable!
+    private var didUserTap = false
     
     // MARK: Initialization
    
@@ -491,6 +492,7 @@ open class MobilePlayerViewController: UIViewController {
     /// Hides/shows controls when content area is tapped once. Overriding this method is recommended if you want to change
     /// this behavior.
     public func handleContentTap() {
+        didUserTap = true
         controlsHidden = !controlsHidden
         externalControlsView?.setControls(hidden: controlsHidden, animated: true, nil)
     }
@@ -590,6 +592,7 @@ open class MobilePlayerViewController: UIViewController {
     private func doFirstPlaySetupIfNeeded() {
         if isFirstPlay {
             isFirstPlay = false
+            controlsHidden = true
             controlsView.previewImageView.isHidden = true
             controlsView.activityIndicatorView.stopAnimating()
         }
@@ -613,9 +616,6 @@ open class MobilePlayerViewController: UIViewController {
         externalControlsView?.currentTime(text: currentTimeText)
         externalControlsView?.remainingTime(text: remaningTimeText)
         externalControlsView?.duration(text: durationText)
-        if !seeking {
-            
-        }
         
         if let playbackSlider = getViewForElementWithIdentifier("playback") as? Slider {
             playbackSlider.maximumValue = maxValue
@@ -662,8 +662,8 @@ open class MobilePlayerViewController: UIViewController {
         hideControlsTimer = Timer.scheduledTimerWithTimeInterval(
             ti: 3,
             callback: {
-                self.controlsView.controlsHidden = (self.state == .playing) || self.isFirstPlay
-                self.externalControlsView?.setControls(hidden:  (self.controlsView.controlsHidden), animated: true, nil)
+                self.controlsView.controlsHidden = (self.state == .playing) || !self.didUserTap
+                self.externalControlsView?.setControls(hidden:  (self.state == .playing) || !self.didUserTap, animated: true, nil)
         },
             repeats: false
         )
@@ -686,7 +686,6 @@ open class MobilePlayerViewController: UIViewController {
         } else {
             playButton?.toggled = false
             hideControlsTimer?.invalidate()
-            controlsView.controlsHidden = false
             if let pauseOverlayViewController = pauseOverlayViewController, (state == .paused && !seeking) {
                 showOverlayViewController(pauseOverlayViewController)
             }

@@ -22,6 +22,7 @@ final class MobilePlayerControlsView: UIView {
     var controlsHidden: Bool = false {
         didSet {
             if oldValue != controlsHidden {
+                externalView?.setControls(hidden: controlsHidden, animated: true, nil)
                 UIView.animate(withDuration: 0.2) {
                     self.layoutSubviews()
                 }
@@ -70,7 +71,6 @@ final class MobilePlayerControlsView: UIView {
                 topBar.removeFromSuperview()
                 bottomBar.removeFromSuperview()
             }
-            _view.setControls(hidden: controlsHidden, animated: true, nil)
         } else {
             topBar.sizeToFit()
             topBar.frame = CGRect(
