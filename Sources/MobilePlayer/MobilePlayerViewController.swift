@@ -146,10 +146,12 @@ open class MobilePlayerViewController: UIViewController {
         }
     }
     
+    #if os(iOS)
     private func actionButtonCallback(sourceView: UIView) {
         resetHideControlsTimer()
         showContentActions(sourceView: sourceView)
     }
+    #endif
     
     private func toggleButtonCallback() {
         resetHideControlsTimer()
@@ -321,9 +323,11 @@ open class MobilePlayerViewController: UIViewController {
         externalControls.setToggleCallback { [weak self] in
             self?.toggleButtonCallback()
         }
+        #if os(iOS)
         externalControls.setActionCallback { [weak self] (sourceView) in
             self?.actionButtonCallback(sourceView: sourceView)
         }
+        #endif
         externalControls.setDismissCallback { [weak self] in
             self?.dismissCallback()
         }
