@@ -264,7 +264,9 @@ open class MobilePlayerViewController: UIViewController {
     open override func viewWillDisappear(_ animated: Bool) {
         
         super.viewWillDisappear(animated)
-        stop()
+        if moviePlayer.rate > 0 {
+            stop()
+        }
     }
     
     // MARK: Deinitialization
