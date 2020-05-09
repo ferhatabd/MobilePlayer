@@ -35,6 +35,7 @@ final class MobilePlayerControlsView: UIView {
         topBar = Bar(config: config.topBarConfig)
         bottomBar = Bar(config: config.bottomBarConfig)
         super.init(frame: .zero)
+        autoresizingMask = [.flexibleWidth, .flexibleHeight]
         previewImageView.contentMode = .scaleAspectFit
         addSubview(previewImageView)
         activityIndicatorView.startAnimating()
@@ -70,6 +71,12 @@ final class MobilePlayerControlsView: UIView {
                 addSubview(_view)
                 topBar.removeFromSuperview()
                 bottomBar.removeFromSuperview()
+                NSLayoutConstraint.activate([
+                    externalView!.leadingAnchor.constraint(equalTo: leadingAnchor),
+                    externalView!.topAnchor.constraint(equalTo: topAnchor),
+                    externalView!.trailingAnchor.constraint(equalTo: trailingAnchor),
+                    externalView!.bottomAnchor.constraint(equalTo: bottomAnchor)
+                ])
             }
         } else {
             topBar.sizeToFit()

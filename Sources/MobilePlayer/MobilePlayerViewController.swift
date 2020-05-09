@@ -345,13 +345,16 @@ open class MobilePlayerViewController: UIViewController {
         controlsView?.removeFromSuperview()
         
         controlsView = MobilePlayerControlsView(config: config)
+        controlsView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(controlsView)
         
-        if #available(iOS 11.0, *) {
-            controlsView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor).isActive = true
-        } else {
-            controlsView.topAnchor.constraint(equalTo: topLayoutGuide.bottomAnchor).isActive = true
-        }
+//        if #available(iOS 11.0, *) {
+//            controlsView.topAnchor.constraint(equalTo: topLayoutGuide.bottomAnchor).isActive = true
+//            controlsView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor).isActive = true
+//        } else {
+//            controlsView.topAnchor.constraint(equalTo: topLayoutGuide.bottomAnchor).isActive = true
+//        }
+        controlsView.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
         controlsView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
         controlsView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
         controlsView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
