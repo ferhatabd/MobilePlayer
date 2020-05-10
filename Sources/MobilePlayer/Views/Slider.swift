@@ -28,6 +28,7 @@ public class Slider: UIView {
     let availableTrack = UIView(frame: .zero)
     let minimumTrack = UIView(frame: .zero)
     let thumb = UIView(frame: .zero)
+    let thumbContainer = UIView(frame: .zero)
     
     // MARK: Initialization
     
@@ -51,8 +52,11 @@ public class Slider: UIView {
         thumb.layer.cornerRadius = config.thumbCornerRadius
         thumb.layer.borderColor = config.thumbBorderColor
         thumb.layer.borderWidth = config.thumbBorderWidth
-        addSubview(thumb)
-        thumb.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(didPanThumb)))
+        thumb.isUserInteractionEnabled = false
+        thumbContainer.backgroundColor = .clear
+        addSubview(thumbContainer)
+        thumbContainer.addSubview(thumb)
+        thumbContainer.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(didPanThumb)))
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -138,16 +142,22 @@ public class Slider: UIView {
             width: maximumTrack.frame.width * (realAvailableValue / realMaximumValue),
             height: config.trackHeight)
         
-        thumb.frame = CGRect(
-            x: (bounds.width - config.thumbWidth) * (realValue / realMaximumValue),
-            y: (bounds.height - config.thumbHeight) / 2,
-            width: config.thumbWidth,
-            height: config.thumbHeight)
+        thumbContainer.frame = CGRect(
+            x: (bounds.width - 4 * config.thumbWidth) * (realValue / realMaximumValue),
+            y: (bounds.height - 4 * config.thumbHeight) / 2,
+            width: 4 * config.thumbWidth,
+            height: 4 * config.thumbHeight)
+        
+        thumb.frame = CGRect(x: 2 * config.thumbWidth,
+                             y: config.thumbHeight * 3/2,
+                             width: config.thumbWidth,
+                             height: config.thumbHeight)
+//        thumb.center = thumbContainer.center
         
         minimumTrack.frame = CGRect(
             x: 0,
             y: 0,
-            width: thumb.frame.midX,
+            width: thumbContainer.frame.midX,
             height: config.trackHeight)
     }
 }
