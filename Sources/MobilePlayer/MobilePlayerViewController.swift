@@ -572,6 +572,18 @@ open class MobilePlayerViewController: UIViewController {
         }
     }
     
+    
+    /// Conveys the state change information to anyone listenining
+    ///
+    /// Default implementation of this methos does nothing, it's meant to be
+    /// overriden by subclasses those that need to
+    ///
+    /// - Parameters:
+    ///   - from: Old state
+    ///   - to: New state
+    open func playerStateChanged(from: State, to: State) {}
+    
+    
     // MARK: Private Methods
     
     private func parseContentURLIfNeeded() {
@@ -681,6 +693,7 @@ open class MobilePlayerViewController: UIViewController {
     // TODO: Change accordingly later on
     private func handleMoviePlayerPlaybackStateDidChangeNotification() {
         state = StateHelper.calculateStateUsing(previousState: previousState, andPlaybackState: moviePlayer.timeControlStatus)
+        playerStateChanged(from: previousState, to: state)
         externalControlsView?.playerStateDidChange(state)
         let playButton = getViewForElementWithIdentifier("play") as? ToggleButton
         if state == .playing {
