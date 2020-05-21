@@ -42,6 +42,17 @@ open class MobilePlayerViewController: UIViewController {
         }
     }
     
+    /// External playback state
+    public private(set) var isExternalPlaybackActive = false {
+        didSet {
+            if isExternalPlaybackActive && !oldValue {
+                showExternalPlaybackOverlay()
+            } else if !isExternalPlaybackActive && oldValue {
+                removeExternalPlaybackOverlay()
+            }
+        }
+    }
+    
     // MARK: Player Configuration
     
     // TODO: Move inside MobilePlayerConfig
@@ -305,11 +316,13 @@ open class MobilePlayerViewController: UIViewController {
                           prerollViewController: MobilePlayerOverlayViewController? = nil,
                           pauseOverlayViewController: MobilePlayerOverlayViewController? = nil,
                           postrollViewController: MobilePlayerOverlayViewController? = nil,
+                          externalPlaybackOverlayViewController: MobilePlayerOverlayViewController? = nil,
                           externalControlsView view: MobilePlayerControllable? = nil) {
         self.config = config
         self.prerollViewController = prerollViewController
         self.pauseOverlayViewController = pauseOverlayViewController
         self.postrollViewController = postrollViewController
+        self.externalPlaybackOverlayViewController = externalPlaybackOverlayViewController
         self.contentUrl = contentURL
         self.externalControlsView = view
         setControlsView()
@@ -523,6 +536,13 @@ open class MobilePlayerViewController: UIViewController {
     /// finishes.
     public var postrollViewController: MobilePlayerOverlayViewController?
     
+    /// If not nil, when it's detected that an external playback is active, the
+    ///` externalPlaybackOverlayViewController``will be shown
+    ///
+    /// Last second updates to the already configured view controller is possible
+    /// by overriding the `willShowExternalPlaybackOverlay` method
+    public var externalPlaybackOverlayViewController: MobilePlayerOverlayViewController?
+    
     /// Presents given overlay view controller on top of the player content immediately, or at a given content time for
     /// a given duration. Both starting time and duration parameters should be provided to show a timed overlay.
     ///
@@ -552,6 +572,12 @@ open class MobilePlayerViewController: UIViewController {
     /// - Parameter viewController: PostrollViewController to be shown
     open func willShowPostrollViewController(_ viewController: MobilePlayerOverlayViewController) { }
     
+    /// Called prior to showing an already configured `externalPlaybackOverlayViewController`
+    ///
+    /// Default implementation does nothing, subclasses can do last second adjustments to the overlay if there is a need to
+    /// - Parameter viewController: Configured view controller for the overlay
+    open func willShowExternalPlaybackOverlayViewController(_ viewController: MobilePlayerOverlayViewController) { }
+    
     /// Dismisses all currently presented overlay view controllers and clears any timed overlays.
     public func clearOverlays() {
         for timedOverlayInfo in timedOverlays {
@@ -563,6 +589,14 @@ open class MobilePlayerViewController: UIViewController {
             (childViewController as? MobilePlayerOverlayViewController)?.dismiss()
         }
     }
+    
+    /// Prematurely seeks to the end of the current item of the player
+    /// therefore it triggers all the player end events
+    open func seekToEnd() {
+        guard let duration = moviePlayer?.currentItem?.duration else { return }
+        moviePlayer?.seek(to: duration)
+    }
+    
     
     /// Player is ready to play
     open func readyToPlay()  {
@@ -695,6 +729,7 @@ open class MobilePlayerViewController: UIViewController {
         state = StateHelper.calculateStateUsing(previousState: previousState, andPlaybackState: moviePlayer.timeControlStatus)
         playerStateChanged(from: previousState, to: state)
         externalControlsView?.playerStateDidChange(state)
+        isExternalPlaybackActive = moviePlayer?.isExternalPlaybackActive ?? false
         let playButton = getViewForElementWithIdentifier("play") as? ToggleButton
         if state == .playing {
             doFirstPlaySetupIfNeeded()
@@ -738,6 +773,24 @@ open class MobilePlayerViewController: UIViewController {
                 }
             }
         }
+    }
+    
+    
+    /// Internal method for displaying an external playback overlay view contoller
+    private func showExternalPlaybackOverlay() {
+        guard let vc = externalPlaybackOverlayViewController else { return }
+        willShowExternalPlaybackOverlayViewController(vc)
+        //
+        prerollViewController?.dismiss()
+        pauseOverlayViewController?.dismiss()
+        postrollViewController?.dismiss()
+        showOverlayViewController(vc)
+    }
+    
+    
+    /// Removes external playback overlay view controller
+    private func removeExternalPlaybackOverlay() {
+        externalPlaybackOverlayViewController?.dismiss()
     }
 }
 
@@ -796,6 +849,7 @@ extension MobilePlayerViewController: PlayerItemStatusDelegate {
         } else {
             if let postrollVC = postrollViewController {
                 prerollViewController?.dismiss()
+                externalPlaybackOverlayViewController?.dismiss()
                 pauseOverlayViewController?.dismiss()
                 willShowPostrollViewController(postrollVC)
                 showOverlayViewController(postrollVC)
