@@ -361,12 +361,6 @@ open class MobilePlayerViewController: UIViewController {
         controlsView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(controlsView)
         
-//        if #available(iOS 11.0, *) {
-//            controlsView.topAnchor.constraint(equalTo: topLayoutGuide.bottomAnchor).isActive = true
-//            controlsView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor).isActive = true
-//        } else {
-//            controlsView.topAnchor.constraint(equalTo: topLayoutGuide.bottomAnchor).isActive = true
-//        }
         controlsView.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
         controlsView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
         controlsView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
@@ -413,6 +407,14 @@ open class MobilePlayerViewController: UIViewController {
         resetHideControlsTimer()
     }
     
+    /// Shows the externalPlayback view controller
+    open func showExternalPlaybackOverlay() {
+        _showExternalPlaybackOverlay()
+    }
+    
+    open func removeExternalPlaybackOverlay() {
+        _removeExternalPlaybackOverlay()
+    }
     
     // MARK: Video Rendering
     
@@ -777,7 +779,7 @@ open class MobilePlayerViewController: UIViewController {
     
     
     /// Internal method for displaying an external playback overlay view contoller
-    private func showExternalPlaybackOverlay() {
+    private func _showExternalPlaybackOverlay() {
         guard let vc = externalPlaybackOverlayViewController else { return }
         willShowExternalPlaybackOverlayViewController(vc)
         //
@@ -789,7 +791,7 @@ open class MobilePlayerViewController: UIViewController {
     
     
     /// Removes external playback overlay view controller
-    private func removeExternalPlaybackOverlay() {
+    private func _removeExternalPlaybackOverlay() {
         externalPlaybackOverlayViewController?.dismiss()
     }
 }
