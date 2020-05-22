@@ -84,13 +84,7 @@ open class MobilePlayerViewController: UIViewController {
     
     #if os(iOS)
     open override var prefersStatusBarHidden: Bool { true }
-    #endif
-    
-    #if os(iOS)
     open override var preferredStatusBarUpdateAnimation: UIStatusBarAnimation { .fade }
-    #endif
-    
-    #if os(iOS)
     open override var prefersHomeIndicatorAutoHidden: Bool { true }
     #endif
     
