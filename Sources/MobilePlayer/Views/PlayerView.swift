@@ -70,7 +70,6 @@ public class PlayerView: UIView {
     public var url: URL? {
         didSet {
             if let _url = url {
-                let _player = AVPlayer(url: _url)
                 _player.allowsExternalPlayback = true
                 player = _player
             }
