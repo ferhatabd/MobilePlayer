@@ -53,6 +53,12 @@ open class MobilePlayerViewController: UIViewController {
         }
     }
     
+    // MARK: Player Status
+    
+    
+    /// Gives information whether Postroll viewcontroller is currently visible on the screen
+    public var isPostrollShown = false
+    
     // MARK: Player Configuration
     
     // TODO: Move inside MobilePlayerConfig
@@ -566,7 +572,9 @@ open class MobilePlayerViewController: UIViewController {
     
     /// Can be used as the last point before the postrol view controller shown in ortder to update it
     /// - Parameter viewController: PostrollViewController to be shown
-    open func willShowPostrollViewController(_ viewController: MobilePlayerOverlayViewController) { }
+    open func willShowPostrollViewController(_ viewController: MobilePlayerOverlayViewController) {
+        isPostrollShown = true 
+    }
     
     /// Called prior to showing an already configured `externalPlaybackOverlayViewController`
     ///
@@ -584,6 +592,7 @@ open class MobilePlayerViewController: UIViewController {
             if childViewController is WatermarkViewController { continue }
             (childViewController as? MobilePlayerOverlayViewController)?.dismiss()
         }
+        isPostrollShown = false 
     }
     
     /// Prematurely seeks to the end of the current item of the player
