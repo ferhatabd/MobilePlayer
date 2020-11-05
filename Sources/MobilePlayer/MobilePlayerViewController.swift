@@ -597,9 +597,13 @@ open class MobilePlayerViewController: UIViewController {
     
     /// Prematurely seeks to the end of the current item of the player
     /// therefore it triggers all the player end events
-    open func seekToEnd() {
-        guard let duration = moviePlayer?.currentItem?.duration else { return }
-        moviePlayer?.seek(to: duration)
+    /// - Parameter completion: Block to be called after the seek operation is completed (either with success or failure)
+    open func seekToEnd(_ completion: ((Bool)->())? = nil) {
+        guard let duration = moviePlayer?.currentItem?.duration.seconds else { return }
+        let seekTo = CMTime(seconds: duration, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
+        moviePlayer?.seek(to: seekTo, toleranceBefore: .zero, toleranceAfter:  .zero) { [weak self] success in
+            completion?(success)
+        }
     }
     
     
