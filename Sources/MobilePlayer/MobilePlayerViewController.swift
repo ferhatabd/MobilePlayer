@@ -302,6 +302,14 @@ open class MobilePlayerViewController: UIViewController {
     /// Player will start playing from the beginning once it reaches the end
     public var shouldAutoRepeat: Bool = false
     
+    /// When this flag is set the player will make use of
+    /// `AVPlayer`'s  `isExternalPlaybackActive` bit to detect the external playback
+    /// status.
+    /// In case a 3rd party casting service is used (e.g. GoogleCast) this will not work. That case
+    /// it's useful to reset this flag and set the external playback status manually
+    ///
+    public var externalPlaybackDetectedAutomatically = true
+    
     /// Initializes a player with content given by `contentURL`. If provided, the overlay view controllers used to
     /// initialize the player should be different instances from each other.
     ///
@@ -414,6 +422,16 @@ open class MobilePlayerViewController: UIViewController {
     
     open func removeExternalPlaybackOverlay() {
         _removeExternalPlaybackOverlay()
+    }
+    
+    /// Sets `isExternalPlaybackActive` flag
+    ///
+    /// - Important:
+    /// This will only work in case `externalPlaybackDetectedAutomatically` is set to __false__
+    /// - Parameter active: New status
+    open func setExternalPlayback(active: Bool) {
+        guard !externalPlaybackDetectedAutomatically else { return }
+        isExternalPlaybackActive = active
     }
     
     // MARK: Video Rendering
@@ -738,7 +756,9 @@ open class MobilePlayerViewController: UIViewController {
         state = StateHelper.calculateStateUsing(previousState: previousState, andPlaybackState: moviePlayer.timeControlStatus)
         playerStateChanged(from: previousState, to: state)
         externalControlsView?.playerStateDidChange(state)
-        isExternalPlaybackActive = moviePlayer?.isExternalPlaybackActive ?? false
+        if externalPlaybackDetectedAutomatically {
+            isExternalPlaybackActive = moviePlayer?.isExternalPlaybackActive ?? false
+        }
         let playButton = getViewForElementWithIdentifier("play") as? ToggleButton
         if state == .playing {
             doFirstPlaySetupIfNeeded()
