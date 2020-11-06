@@ -165,8 +165,7 @@ open class MobilePlayerViewController: UIViewController {
     #endif
     
     private func toggleButtonCallback() {
-        resetHideControlsTimer()
-        state == .playing ? pause() : play()
+        toggle()
     }
     
     private func initializeControlsView() {
@@ -395,6 +394,15 @@ open class MobilePlayerViewController: UIViewController {
     /// Ends playback of current content.
     open func stop() {
         moviePlayer?.pause()
+    }
+    
+    /// Toggles the actual playback
+    /// - Note: In case of an active third party, override this method
+    /// to control the remote media. Otherwise just call the super's implementation
+    ///
+    open func toggle() {
+        resetHideControlsTimer()
+        state == .playing ? pause() : play()
     }
     
     /// Scrolls playback to 15 seconds later
