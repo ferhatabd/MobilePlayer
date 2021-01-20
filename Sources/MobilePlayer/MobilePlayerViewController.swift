@@ -906,6 +906,12 @@ extension MobilePlayerViewController: PlayerItemStatusDelegate {
         }
     }
     
+    public func timeControlStatusDidChange(from: AVPlayer.TimeControlStatus, to: AVPlayer.TimeControlStatus) {
+        if state != .idle && state != .paused && to == .paused {
+            state = .paused
+            pause()
+        }
+    }
     
 }
 

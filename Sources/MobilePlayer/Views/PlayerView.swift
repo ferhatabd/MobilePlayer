@@ -16,6 +16,8 @@ public protocol PlayerItemStatusDelegate: AnyObject {
     func playerDidFinish(_ player: AVPlayer)
     
     func cycleDidMove(_ player: AVPlayer, time: CMTime)
+    
+    func timeControlStatusDidChange(from: AVPlayer.TimeControlStatus, to: AVPlayer.TimeControlStatus)
 }
 
 
@@ -48,6 +50,11 @@ public class PlayerView: UIView {
                                                          forKeyPath: #keyPath(AVPlayerItem.status),
                                                          options: [.old, .new],
                                                          context: &self.itemStatusObserver)
+            
+            playerLayer.player?.addObserver(self,
+                                            forKeyPath: #keyPath(AVPlayer.timeControlStatus),
+                                            options: [.old, .new],
+                                            context: &timeControlStatusObserver)
             
             playerLayer.player?.addPeriodicTimeObserver(forInterval: CMTime(seconds: 0.5, preferredTimescale: CMTimeScale(NSEC_PER_SEC)), queue: .main, using: {[weak self] (time) in
                 guard let self = self else { return }
@@ -118,7 +125,8 @@ public class PlayerView: UIView {
     // Status KVO
     public override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         // make sure the notification is meant for us
-        guard context == &self.itemStatusObserver else {
+        guard context == &self.itemStatusObserver ||
+                context == &self.timeControlStatusObserver else {
             super.observeValue(forKeyPath: keyPath,
                                of: object,
                                change: change,
@@ -138,12 +146,23 @@ public class PlayerView: UIView {
             guard let item = playerLayer.player?.currentItem else { return }
             delegate?.statusDidChange(status, item: item)
             
+        } else if keyPath == #keyPath(AVPlayer.timeControlStatus) {
+            guard let oldValue = change?[.oldKey] as? Int,
+                  let newValue = change?[.newKey] as? Int,
+                  let oldState = AVPlayer.TimeControlStatus(rawValue: oldValue),
+                  let newState = AVPlayer.TimeControlStatus(rawValue: newValue) else {
+                return
+            }
+            delegate?.timeControlStatusDidChange(from: oldState, to: newState)
         }
     }
     
     // MARK: - Private properties
     /// Player item status KVO obsver context
     private var itemStatusObserver: Int = 1
+    
+    /// Player `timeControlStatus` observer context
+    private var timeControlStatusObserver: Int = 22
     
     /// Player item periodic observer
     private var playerPeriodicObserver: Any!
