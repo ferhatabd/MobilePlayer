@@ -771,8 +771,9 @@ open class MobilePlayerViewController: UIViewController {
     
     // TODO: Change accordingly later on
     private func handleMoviePlayerPlaybackStateDidChangeNotification() {
+        let _previousState = previousState
         state = StateHelper.calculateStateUsing(previousState: previousState, andPlaybackState: moviePlayer.timeControlStatus)
-        playerStateChanged(from: previousState, to: state)
+        playerStateChanged(from: _previousState, to: state)
         externalControlsView?.playerStateDidChange(state)
         if externalPlaybackDetectedAutomatically {
             isExternalPlaybackActive = moviePlayer?.isExternalPlaybackActive ?? false
