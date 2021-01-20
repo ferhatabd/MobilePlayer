@@ -405,21 +405,31 @@ open class MobilePlayerViewController: UIViewController {
         state == .playing ? pause() : play()
     }
     
-    /// Scrolls playback to 15 seconds later
-    open func skipFwd() {
+    /// Scrolls playback to forward
+    /// - Parameters:
+    ///   - interval: Skip forward duration **[s]**
+    ///   - callback: Callback is triggered once the skipping is completed
+    open func skipFwd(interval: Double = 15, _ callback: ((Bool) -> ())? = nil) {
         guard let player = moviePlayer, let item = player.currentItem else { return }
         let currentTime = player.currentTime().seconds
-        let nextTime = min(currentTime + 15, item.duration.seconds)
-        player.seek(to: CMTime(seconds: nextTime, preferredTimescale: CMTimeScale(NSEC_PER_SEC)))
+        let nextTime = min(currentTime + interval, item.duration.seconds)
+        player.seek(to: CMTime(seconds: nextTime, preferredTimescale: CMTimeScale(NSEC_PER_SEC))) { (success) in
+            callback?(success)
+        }
         resetHideControlsTimer()
     }
     
-    /// Scrolls playback to 15 seconds before
-    open func skipBwd() {
+    /// Scrolls playback to backward
+    /// - Parameters:
+    ///   - interval: Skip backward duration **[s]**
+    ///   - callback: Callback is triggered once the skipping is completed
+    open func skipBwd(interval: Double = 15, _ callback: ((Bool) -> ())? = nil) {
         guard let player = moviePlayer else { return }
         let currentTime = player.currentTime().seconds
-        let nextTime = max(currentTime - 15, 0)
-        player.seek(to: CMTime(seconds: nextTime, preferredTimescale: CMTimeScale(NSEC_PER_SEC)))
+        let nextTime = max(currentTime - interval, 0)
+        player.seek(to: CMTime(seconds: nextTime, preferredTimescale: CMTimeScale(NSEC_PER_SEC))) { (success) in
+            callback?(success)
+        }
         resetHideControlsTimer()
     }
     
