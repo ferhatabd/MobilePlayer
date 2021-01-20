@@ -107,12 +107,12 @@ public class PlayerView: UIView {
         guard let _player = self.player else { return }
         delegate?.cycleDidMove(_player, time: time)
     }
-    
+        
     // MARK: - Initialization
     deinit {
         NotificationCenter.default.removeObserver(self)
         player?.currentItem?.removeObserver(self, forKeyPath: #keyPath(AVPlayerItem.status))
-        
+        player?.removeObserver(self, forKeyPath: #keyPath(AVPlayer.timeControlStatus), context: &timeControlStatusObserver)
         // check the periodic observer as well
         if let token = playerPeriodicObserver {
             playerLayer.player?.removeTimeObserver(token)
