@@ -911,6 +911,7 @@ extension MobilePlayerViewController: PlayerItemStatusDelegate {
             state = .paused
             pause()
         }
+        handleMoviePlayerPlaybackStateDidChangeNotification()
     }
     
 }
