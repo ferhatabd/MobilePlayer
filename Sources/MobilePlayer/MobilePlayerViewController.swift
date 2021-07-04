@@ -1027,7 +1027,7 @@ private extension Float {
 extension MobilePlayerViewController: AVPictureInPictureControllerDelegate {
     
     public func pictureInPictureControllerWillStartPictureInPicture(_ pictureInPictureController: AVPictureInPictureController) {
-        controlsHidden = !controlsHidden
+        controlsHidden = true
         externalControlsView?.setControls(hidden: true, animated: true, nil)
     }
     
@@ -1039,7 +1039,7 @@ extension MobilePlayerViewController: AVPictureInPictureControllerDelegate {
     }
     
     public func pictureInPictureControllerDidStopPictureInPicture(_ pictureInPictureController: AVPictureInPictureController) {
-        controlsHidden = !controlsHidden
+        controlsHidden = false
         externalControlsView?.setControls(hidden: false, animated: true, nil)
         isPiPActive = false
     }
