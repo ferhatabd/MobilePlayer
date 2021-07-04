@@ -32,6 +32,16 @@ open class MobilePlayerViewController: UIViewController {
         case paused
     }
     
+    /// PiP Errors
+    public enum PictureInPictureError: Error {
+        /// PiP is not supported by the current device
+        case notSupported
+        /// PiP is not enabled for the `MobilePlayerViewController` please enable within the `setConfig()` call
+        case notEnabled
+        /// PictureInPicture is not configured yet
+        case notYetConfigured
+    }
+    
     /// The previous value of `state`. Default is `.Idle`.
     public private(set) var previousState: State = .idle
     
@@ -100,6 +110,9 @@ open class MobilePlayerViewController: UIViewController {
     /// will be used to look for the resources
     open class var bundleForResources: URL? { nil }
     
+    /// PiP active flag
+    open var isPiPActive = false
+    
     // MARK: Private Properties
     private var controlsView: MobilePlayerControlsView!
     private var previousStatusBarHiddenValue: Bool?
@@ -118,6 +131,17 @@ open class MobilePlayerViewController: UIViewController {
     private var playerObserver: Any!
     private var externalControlsView: MobilePlayerControllable!
     private var didUserTap = false
+    
+    /// PiP enable flag
+    ///
+    /// Set via the config
+    private var isPiPAllowed = false
+    
+    /// PiP Controller
+    private var pipController: AVPictureInPictureController!
+
+    /// PiP observer
+    private var pipPossibleObserver: NSKeyValueObservation?
     
     // MARK: Initialization
    
@@ -156,6 +180,7 @@ open class MobilePlayerViewController: UIViewController {
             presentingController.dismiss(animated: true)
         }
     }
+    
     
     #if os(iOS)
     private func actionButtonCallback(sourceView: UIView) {
@@ -288,6 +313,7 @@ open class MobilePlayerViewController: UIViewController {
             moviePlayer?.removeTimeObserver(token)
             playerObserver = nil
         }
+        pipPossibleObserver?.invalidate()
     }
     
     // MARK: Playback
@@ -324,7 +350,8 @@ open class MobilePlayerViewController: UIViewController {
                           pauseOverlayViewController: MobilePlayerOverlayViewController? = nil,
                           postrollViewController: MobilePlayerOverlayViewController? = nil,
                           externalPlaybackOverlayViewController: MobilePlayerOverlayViewController? = nil,
-                          externalControlsView view: MobilePlayerControllable? = nil) {
+                          externalControlsView view: MobilePlayerControllable? = nil,
+                          isPiPAllowed: Bool = false) {
         self.config = config
         self.prerollViewController = prerollViewController
         self.pauseOverlayViewController = pauseOverlayViewController
@@ -332,9 +359,70 @@ open class MobilePlayerViewController: UIViewController {
         self.externalPlaybackOverlayViewController = externalPlaybackOverlayViewController
         self.contentUrl = contentURL
         self.externalControlsView = view
+        self.isPiPAllowed = isPiPAllowed
         setControlsView()
         initializeMobilePlayerViewController()
-        controlsHidden = true 
+        controlsHidden = true
+        if isPiPAllowed {
+            do {
+                try setupPip()
+            } catch {
+                if (error as? MobilePlayerViewController.PictureInPictureError) == PictureInPictureError.notSupported {
+                    print("MobilePlayerViewController => PiP is not supported on the current device")
+                }
+            }
+        }
+    }
+    
+    open func setupPip() throws {
+        guard AVPictureInPictureController.isPictureInPictureSupported() else { throw PictureInPictureError.notSupported }
+        guard isPiPAllowed else { throw PictureInPictureError.notEnabled }
+        pipController = AVPictureInPictureController(playerLayer: playerView.playerLayer)
+        pipController.delegate = self
+        if #available(iOS 14.2, *) {
+            pipController.canStartPictureInPictureAutomaticallyFromInline = true
+        }
+        
+        pipPossibleObserver = pipController.observe(\AVPictureInPictureController.isPictureInPicturePossible,
+                                                                    options: [.initial, .new]) { [weak self] _, change in
+            self?.pipPossible(change.newValue ?? false)
+        }
+    }
+    
+    /// Method will be called everytime the Picture in Picture availablility changes
+    ///  Subclasses may override the call to react to changes here
+    /// - Parameter isPossible: New PiP availability state
+    open func pipPossible(_ isPossible: Bool) { }
+    
+    /// Internally starts the Picture in Picture mode
+    ///
+    /// - Important: It's safe to override the call to this method as long is the call
+    /// is propagated to the superclass
+    open func startPictureInPicture() {
+        pipController?.startPictureInPicture()
+    }
+    
+    /// Internally stops the Picture in Picture mode
+    ///
+    /// - Important: It's safe to override the call to this method as long is the call
+    /// is propagated to the superclass
+    open func stopPictureInPicture() {
+        pipController?.stopPictureInPicture()
+    }
+    
+    /// Enables or disables the `canStartFromInline` mode
+    /// of the PiP mode.
+    /// The default to this mode is `true`. To disable it pass false
+    /// to this method
+    /// - Parameter active: New state for the mode
+    /// - Throws: Method will throw an error in case the internal PiP controller is not yet
+    /// configured.
+    @available(iOS 14.2, *)
+    public func setStartFromInline(active: Bool) throws {
+        guard let pip = pipController else {
+            throw PictureInPictureError.notYetConfigured
+        }
+        pip.canStartPictureInPictureAutomaticallyFromInline = active
     }
     
     private func wireExternalView() {
@@ -637,7 +725,7 @@ open class MobilePlayerViewController: UIViewController {
     open func seekToEnd(_ completion: ((Bool)->())? = nil) {
         guard let duration = moviePlayer?.currentItem?.duration.seconds else { return }
         let seekTo = CMTime(seconds: duration, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
-        moviePlayer?.seek(to: seekTo, toleranceBefore: .zero, toleranceAfter:  .zero) { [weak self] success in
+        moviePlayer?.seek(to: seekTo, toleranceBefore: .zero, toleranceAfter:  .zero) { success in
             completion?(success)
         }
     }
@@ -934,3 +1022,31 @@ private extension Float {
     }
 }
 
+// MARK: - AVPictureInPictureControllerDelegate
+extension MobilePlayerViewController: AVPictureInPictureControllerDelegate {
+    
+    public func pictureInPictureControllerWillStartPictureInPicture(_ pictureInPictureController: AVPictureInPictureController) {
+        externalControlsView?.setControls(hidden: true, animated: true, nil)
+    }
+    
+    public func pictureInPictureControllerWillStopPictureInPicture(_ pictureInPictureController: AVPictureInPictureController) {
+    }
+    
+    public func pictureInPictureControllerDidStartPictureInPicture(_ pictureInPictureController: AVPictureInPictureController) {
+        isPiPActive = true
+    }
+    
+    public func pictureInPictureControllerDidStopPictureInPicture(_ pictureInPictureController: AVPictureInPictureController) {
+        externalControlsView?.setControls(hidden: false, animated: true, nil)
+        isPiPActive = false
+    }
+    
+    public func pictureInPictureController(_ pictureInPictureController: AVPictureInPictureController, restoreUserInterfaceForPictureInPictureStopWithCompletionHandler completionHandler: @escaping (Bool) -> Void) {
+        guard let time = pictureInPictureController.playerLayer.player?.currentTime(),
+              let player = self.moviePlayer else {
+            completionHandler(false)
+            return
+        }
+        player.seek(to: time, completionHandler: completionHandler)
+    }
+}
