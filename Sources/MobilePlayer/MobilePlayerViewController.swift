@@ -555,7 +555,7 @@ open class MobilePlayerViewController: UIViewController {
     /// Makes playback content switch between fill/fit modes when content area is double tapped. Overriding this method
     /// is recommended if you want to change this behavior.
     public func handleContentDoubleTap() {
-        // TODO: videoScalingMode property and enum.
+        guard !isPiPActive else { return }
         playerView.playerLayer.videoGravity != .resizeAspectFill ? fillVideo() : fitVideo()
     }
     
@@ -640,6 +640,7 @@ open class MobilePlayerViewController: UIViewController {
     /// Hides/shows controls when content area is tapped once. Overriding this method is recommended if you want to change
     /// this behavior.
     public func handleContentTap() {
+        guard !isPiPActive else { return }
         didUserTap = true
         controlsHidden = !controlsHidden
         externalControlsView?.setControls(hidden: controlsHidden, animated: true, nil)
@@ -1026,6 +1027,7 @@ private extension Float {
 extension MobilePlayerViewController: AVPictureInPictureControllerDelegate {
     
     public func pictureInPictureControllerWillStartPictureInPicture(_ pictureInPictureController: AVPictureInPictureController) {
+        controlsHidden = !controlsHidden
         externalControlsView?.setControls(hidden: true, animated: true, nil)
     }
     
@@ -1037,6 +1039,7 @@ extension MobilePlayerViewController: AVPictureInPictureControllerDelegate {
     }
     
     public func pictureInPictureControllerDidStopPictureInPicture(_ pictureInPictureController: AVPictureInPictureController) {
+        controlsHidden = !controlsHidden
         externalControlsView?.setControls(hidden: false, animated: true, nil)
         isPiPActive = false
     }
