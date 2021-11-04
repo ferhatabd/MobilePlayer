@@ -851,7 +851,7 @@ open class MobilePlayerViewController: UIViewController {
         hideControlsTimer = Timer.scheduledTimerWithTimeInterval(
             ti: 3,
             callback: {
-                self.controlsView.controlsHidden = (self.state == .playing) || !self.didUserTap
+                self.controlsView?.controlsHidden = (self.state == .playing) || !self.didUserTap
                 self.externalControlsView?.setControls(hidden:  (self.state == .playing) || !self.didUserTap, animated: true, nil)
         },
             repeats: false
